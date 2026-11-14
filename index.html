@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101315">
+  <title>Layar Studio — Perekam layar</title>
+  <link rel="stylesheet" href="studio.css">
+  <script defer src="studio.js"></script>
+</head>
+<body>
+  <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="icon-screen" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    <symbol id="icon-camera" viewBox="0 0 24 24"><rect x="3" y="6" width="12" height="12" rx="2"/><path d="m15 10 6-3v10l-6-3"/></symbol>
+    <symbol id="icon-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3m-3 0h6"/></symbol>
+    <symbol id="icon-audio" viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6l-5 4H3m13-1a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/></symbol>
+    <symbol id="icon-save" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
+  </svg>
+  <header class="site-header">
+    <div class="brand"><span class="brand-mark"><svg><use href="#icon-screen"/></svg></span><span>Layar<span class="brand-light"> Studio</span></span></div>
+    <span class="local"><span></span> Diproses di perangkat</span>
+  </header>
+
+  <main>
+    <div class="intro"><h1>Perekam layar</h1><p>Gabungkan layar, kamera, dan audio dalam satu video.</p></div>
+    <div class="workspace">
+      <section class="monitor card" aria-labelledby="preview-title">
+        <div class="card-top"><h2 id="preview-title">Pratinjau</h2><span id="state" class="state" data-state="idle">Siaga</span></div>
+        <div class="viewport">
+          <canvas id="canvas" width="1280" height="720" aria-label="Pratinjau komposisi video" hidden></canvas>
+          <div id="empty" class="empty">
+            <div class="empty-icon"><svg><use href="#icon-screen"/></svg></div>
+            <strong>Belum ada sumber video</strong>
+            <span>Pilih sumber lalu siapkan pratinjau.</span>
+          </div>
+        </div>
+        <div class="transport">
+          <time id="timer" aria-label="Durasi rekaman">00:00:00</time>
+          <div class="actions">
+            <button id="prepare" class="secondary" type="button">Siapkan pratinjau</button>
+            <button id="release" class="secondary" type="button" hidden>Tutup pratinjau</button>
+            <button id="pause" class="secondary" type="button" hidden>Jeda</button>
+            <button id="record" class="primary" type="button" disabled><span class="record-icon"></span><span id="record-label">Mulai rekam</span></button>
+          </div>
+        </div>
+        <p class="message" id="message" role="status" aria-live="polite">Pilih sumber dan atur audio sebelum mulai.</p>
+      </section>
+
+      <aside class="settings card" aria-labelledby="settings-title">
+        <div class="card-top"><h2 id="settings-title">Pengaturan</h2></div>
+        <fieldset id="source-settings">
+          <legend>Sumber video</legend>
+          <select id="source" aria-label="Sumber video">
+            <option value="screen">Layar, jendela, atau tab</option>
+            <option value="file">File video dari perangkat</option>
+            <option value="camera">Kamera saja</option>
+          </select>
+          <label id="file-field" class="field" hidden>Pilih file video<input id="file" type="file" accept="video/*,.webm,.mp4,.mov"></label>
+          <p id="source-hint" class="hint"></p>
+          <label class="field">Batas resolusi
+            <select id="quality"><option value="720">720p · 30 fps</option><option value="1080">1080p · 30 fps</option></select>
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Kamera</legend>
+          <label class="switch-line"><span><svg><use href="#icon-camera"/></svg> Overlay kamera</span><input type="checkbox" id="overlay" checked></label>
+          <label class="field">Pilihan kamera
+            <select id="camera">
+              <option value="front">Depan / webcam utama</option>
+              <option value="rear">Belakang</option>
+            </select>
+          </label>
+          <div class="pair" id="overlay-controls">
+            <label class="field">Posisi<select id="corner"><option value="br">Kanan bawah</option><option value="bl">Kiri bawah</option><option value="tr">Kanan atas</option><option value="tl">Kiri atas</option></select></label>
+            <label class="field">Ukuran<select id="size"><option value="0.18">Kecil</option><option value="0.24" selected>Sedang</option><option value="0.31">Besar</option></select></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Audio</legend>
+          <label class="switch-line"><span><svg><use href="#icon-mic"/></svg> Mikrofon</span><input type="checkbox" id="mic" checked></label>
+          <label class="level" aria-label="Volume mikrofon"><input id="mic-volume" type="range" min="0" max="100" value="85"><meter id="mic-meter" min="0" max="1" value="0" aria-label="Level mikrofon"></meter></label>
+          <label class="switch-line"><span><svg><use href="#icon-audio"/></svg> Audio media</span><input type="checkbox" id="media" checked></label>
+          <label class="level" aria-label="Volume media"><input id="media-volume" type="range" min="0" max="100" value="85"><meter id="media-meter" min="0" max="1" value="0" aria-label="Level audio media"></meter></label>
+          <p class="hint" id="audio-status">Status audio muncul setelah pratinjau siap.</p>
+        </fieldset>
+      </aside>
+      <section id="result" class="result card" hidden aria-labelledby="result-title">
+        <div class="card-top"><div><h2 id="result-title">Rekaman terakhir</h2><p class="hint" id="result-info"></p></div><a class="primary" id="download" download><svg><use href="#icon-save"/></svg> Unduh video</a></div>
+        <video id="playback" controls playsinline preload="metadata"></video>
+      </section>
+    </div>
+  </main>
+  <div class="inputs" aria-hidden="true">
+    <video id="screen-video" muted playsinline></video>
+    <video id="camera-video" muted playsinline></video>
+    <video id="file-video" playsinline preload="auto"></video>
+  </div>
+</body>
+</html>
